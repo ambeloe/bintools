@@ -15,7 +15,8 @@ func main() {
 		os.Exit(1)
 	}
 	cargs := os.Args[2:]
-	sw: switch os.Args[1] {
+sw:
+	switch os.Args[1] {
 	case "?":
 		fmt.Println("e: copy out chunk of file (both inclusive)\n" +
 			"	Usage:\n" +
@@ -87,7 +88,7 @@ func main() {
 
 		os.Args[1] = "e"
 		cargs[1] = strconv.FormatUint(s, 16) + ":" + strconv.FormatUint(e, 16) //update range
-		fmt.Println(cargs)
+		//fmt.Println(cargs)
 		goto sw
 	default:
 		fmt.Println("command not implemented:", os.Args[1])

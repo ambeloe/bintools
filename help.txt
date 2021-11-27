@@ -1,0 +1,14 @@
+bintools [command] [arguments]...
+
+commands:
+?: prints this help page
+e: copy out chunk of file (both inclusive)
+	Usage:
+	|- infile startaddr:endaddr outfile
+	|_ infile startaddr:endaddr
+ez: e but with leading and trailing zeroes cut off
+	Usage: same as e
+c: split file into chunks with an optional start offset
+	Usage:
+	|- infile chunksize hexoffset
+	|_ infile chunksize

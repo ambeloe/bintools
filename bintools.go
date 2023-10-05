@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"math"
 	"os"
 	"path/filepath"
@@ -13,7 +12,8 @@ import (
 	"strings"
 )
 
-//easier to write this way; an extra 2kb of ram usage shouldn't be an issue
+// easier to write this way; an extra 2kb of ram usage shouldn't be an issue
+//
 //go:embed help.txt
 var helpText string
 
@@ -32,7 +32,7 @@ sw:
 	case "e":
 		vargnum(cargs, 2, 3)
 
-		f, err := ioutil.ReadFile(cargs[0])
+		f, err := os.ReadFile(cargs[0])
 		exitErr(err, "error reading infile")
 
 		//parse start and end addresses
@@ -134,8 +134,8 @@ sw:
 				fmt.Println("error reading chunk from infile,", err)
 			}
 
-			//named infile_i_startaddr:endaddr.chunk
-			err = os.WriteFile(filepath.Base(f.Name())+"_"+strconv.Itoa(i)+"_"+strconv.FormatInt(off, 16)+":"+strconv.FormatInt(off+int64(c), 16)+".chunk", chunk, 0644)
+			//named infile_i_startaddr:endaddr::lastdataaddr.chunk
+			err = os.WriteFile(filepath.Base(f.Name())+"_"+strconv.Itoa(i)+"_"+strconv.FormatInt(off, 16)+":"+strconv.FormatInt(off+int64(c), 16)+"::"+strconv.FormatInt(int64(lastData(chunk)+1), 16)+".chunk", chunk, 0644)
 			exitErr(err, "error writing chunk")
 			off += int64(c)
 			if n != int(c) {
@@ -148,7 +148,7 @@ sw:
 	}
 }
 
-//parse range in format startaddr:endaddr
+// parse range in format startaddr:endaddr
 func parseRange(ran string) (start uint64, end uint64, err error) {
 	els := strings.Split(ran, ":")
 	if len(els) != 2 {
@@ -165,7 +165,7 @@ func parseRange(ran string) (start uint64, end uint64, err error) {
 	return
 }
 
-//check if correct number of args is passed
+// check if correct number of args is passed
 func vargnum(a []string, min int, max int) {
 	if len(a) < min || len(a) > max {
 		fmt.Println("invalid arguments")
@@ -178,4 +178,21 @@ func exitErr(err error, message ...interface{}) {
 		fmt.Println(message)
 		os.Exit(1)
 	}
+}
+
+func allZero(data []byte) bool {
+	if lastData(data) == -1 {
+		return true
+	}
+	return false
+}
+
+// lastData index of last data byte (first non-zero byte from the end)
+func lastData(data []byte) int {
+	for i := len(data) - 1; i >= 0; i-- {
+		if data[i] != 0 {
+			return i
+		}
+	}
+	return -1
 }
